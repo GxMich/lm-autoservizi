@@ -1,0 +1,12 @@
+# Font e librerie non cambiano: cache lunga. Il resto (foto, CSS, JS del sito) può essere aggiornato: cache di un giorno.
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/js/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=86400
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
