@@ -1,5 +1,6 @@
 import hashlib, json, os, sys
 from lancio_config import LANCIO_ISO, APERTURA_CONFERMATA
+from richiesta import sezione_richiesta, risorse_richiesta
 
 QUI = os.path.dirname(os.path.abspath(__file__))
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(QUI)
@@ -141,7 +142,7 @@ def head(pagina, titolo, descrizione, extra_schema=None, noindex=False):
 <script>(function(d){{d.classList.remove("no-js");d.classList.add("js");if(matchMedia("(prefers-reduced-motion: reduce)").matches)d.classList.add("no-motion");else d.classList.add("anim")}})(document.documentElement);</script>
 <link rel="preload" href="assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/style.css">
-{lancio_script}{ld}
+{risorse_richiesta() + chr(10) if pagina == "index.html" else ""}{lancio_script}{ld}
 </head>
 <body>
 <a class="skip-link" href="#contenuto">Vai al contenuto</a>
@@ -193,7 +194,7 @@ def finale(titolo="La tua auto ha un problema?", testo="Chiama o scrivi: ti dico
       <a class="numerone" href="tel:{TEL}">{TEL_TXT}</a>
       <div class="azioni">
         <a class="btn btn--scuro" href="{WA}" target="_blank" rel="noopener" data-magnete>{I["chat"]}Scrivi su WhatsApp</a>
-        <a class="btn btn--chiaro" href="contatti.html#preventivo" data-magnete>{I["doc"]}Preventivo gratuito</a>
+        <a class="btn btn--chiaro" href="index.html#richiesta" data-magnete>{I["doc"]}Descrivi il problema</a>
       </div>
     </div>
   </div>
@@ -217,7 +218,7 @@ def footer():
           <li><a href="servizi.html">Servizi</a></li>
           <li><a href="come-funziona.html">Come funziona</a></li>
           <li><a href="chi-sono.html">Chi sono e attestati</a></li>
-          <li><a href="contatti.html#preventivo">Preventivo gratuito</a></li>
+          <li><a href="index.html#richiesta">Preventivo gratuito</a></li>
         </ul>
       </div>
       <div>
@@ -251,7 +252,7 @@ def footer():
 <nav class="barra-mobile" aria-label="Azioni rapide">
   <a class="chiama" href="tel:{TEL}">{I["tel"]}Chiama</a>
   <a href="{WA}" target="_blank" rel="noopener">{I["chat"]}WhatsApp</a>
-  <a href="contatti.html#preventivo">{I["doc"]}Preventivo</a>
+  <a href="index.html#richiesta">{I["doc"]}Preventivo</a>
 </nav>
 
 <script src="assets/js/vendor/gsap.min.js" defer></script>
@@ -394,7 +395,7 @@ home = head("index.html",
       <p><strong>Meccanico, elettrauto, gommista e carrozzeria</strong> a casa tua, al lavoro o dove sei rimasto fermo.</p>
       <div class="azioni">
         <a class="btn btn--arancio" href="tel:{TEL}" data-magnete>{I["tel"]}Chiama {TEL_TXT}</a>
-        <a class="btn btn--vuoto" href="contatti.html#preventivo" data-magnete>{I["doc"]}Preventivo gratuito</a>
+        <a class="btn btn--vuoto" href="#richiesta" data-magnete>{I["doc"]}Descrivi il problema</a>
       </div>
     </div>
     <div class="scorri" aria-hidden="true"><i></i>Scorri</div>
@@ -414,7 +415,7 @@ home = head("index.html",
     </div>
   </div>
 </section>
-''' + strada() + f'''
+''' + sezione_richiesta() + strada() + f'''
 <section class="notte" aria-labelledby="notte-titolo">
   <div class="notte-foto" aria-hidden="true"><img src="assets/img/foto/fascia-notte.webp" alt="" loading="lazy" width="960" height="640" data-parallax></div>
   <div class="wrap">

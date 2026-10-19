@@ -84,6 +84,11 @@ Su mobile le parti "bloccate" diventano scorrimenti normali. Con "riduci movimen
 non si caricano, il sito resta completo e statico.
 
 ## Funzioni
+- Nelle due home, **Descrivi il problema** porta al modulo guidato: scelta del problema, modalità dell'intervento,
+  auto, comune e dettagli facoltativi. L'anteprima del messaggio si aggiorna mentre scrivi; **Apri WhatsApp con il messaggio**
+  apre la richiesta già compilata. L'invio lo conferma il cliente su WhatsApp. È disponibile anche il collegamento per chiamare.
+  Modello comune in `sorgente/richiesta.py`, stili in `assets/css/richiesta.css`, script indipendente dalle animazioni in `assets/js/richiesta.js`.
+- La pagina Contatti e la richiesta di ritiro del sito nuovo includono anche la selezione del tipo di problema.
 - Stato "Aperto ora / Chiuso" in ora italiana (orari in `assets/js/main.js`, costante `ORARI`)
 - Preventivo guidato in 3 passi: apre WhatsApp o l'email con il messaggio già scritto
 - Mappa Google caricata solo su richiesta (nessun cookie di default)

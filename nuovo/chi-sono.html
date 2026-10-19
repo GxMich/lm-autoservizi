@@ -19,7 +19,7 @@
 <script>(function(d){d.classList.add("js");try{var q=location.search;if(/salta=1/.test(q))d.classList.add("salta");else if(/lancio=1/.test(q)&&window!==window.top)d.classList.add("attesa");if(matchMedia("(prefers-reduced-motion: reduce)").matches)d.classList.add("fermo")}catch(e){}setTimeout(function(){if(!window.__nuovoPronto)d.classList.add("salta")},6000)})(document.documentElement);
 window.__LM={"demo": true, "reale": "2027-01-01T00:00:00+01:00", "vecchio": "../index.html"};</script>
 <link rel="preload" href="../assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="nuovo.css?v=154596bd29">
+<link rel="stylesheet" href="nuovo.css?v=c3550d0794">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "AutoRepair", "@id": "https://www.lmautoservizi.it/#azienda", "name": "L.M. Autoservizi di Miglietta Luca", "description": "Officina a Frassineto Po: meccanica, elettronica, gomme e carrozzeria, con ritiro e consegna dell'auto, vettura di cortesia gratuita e officina mobile.", "url": "https://www.lmautoservizi.it/", "telephone": "+393426436085", "email": "lucamiglietta4@gmail.com", "vatID": "IT02625920067", "founder": {"@type": "Person", "name": "Luca Miglietta"}, "address": {"@type": "PostalAddress", "streetAddress": "Via Ticineto 15", "postalCode": "15040", "addressLocality": "Frassineto Po", "addressRegion": "AL", "addressCountry": "IT"}, "geo": {"@type": "GeoCoordinates", "latitude": 45.1284713, "longitude": 8.5431679}, "hasMap": "https://maps.app.goo.gl/MKwoz3CKAvCdeNwj8", "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "07:30", "closes": "19:30"}], "paymentAccepted": "Contanti, Carta di credito, Bancomat", "areaServed": [{"@type": "City", "name": "Frassineto Po"}, {"@type": "City", "name": "Casale Monferrato"}]}</script>
 </head>
 <body>
@@ -90,10 +90,11 @@ window.__LM={"demo": true, "reale": "2027-01-01T00:00:00+01:00", "vecchio": "../
   <form data-modulo data-intro="Ciao Luca, vorrei far ritirare l'auto." novalidate>
     <button class="foglio-chiudi" type="button" aria-label="Chiudi" data-chiudi>×</button>
     <h2 id="foglio-t">Chiedi il ritiro dell'auto</h2>
-    <p class="piccolo">Tre dati e si apre WhatsApp con il messaggio già scritto.</p>
+    <p class="piccolo">Scegli il problema e indica dove si trova l'auto: la richiesta si prepara su WhatsApp.</p>
     <div class="campo"><label for="f-targa">Targa dell'auto</label>
       <div class="targa"><span class="targa-ue" aria-hidden="true"><svg viewBox="0 0 44 64" width="44" height="64"><circle cx="33.0" cy="19.0" r="1.35" fill="#f2c230"/><circle cx="31.5" cy="24.5" r="1.35" fill="#f2c230"/><circle cx="27.5" cy="28.5" r="1.35" fill="#f2c230"/><circle cx="22.0" cy="30.0" r="1.35" fill="#f2c230"/><circle cx="16.5" cy="28.5" r="1.35" fill="#f2c230"/><circle cx="12.5" cy="24.5" r="1.35" fill="#f2c230"/><circle cx="11.0" cy="19.0" r="1.35" fill="#f2c230"/><circle cx="12.5" cy="13.5" r="1.35" fill="#f2c230"/><circle cx="16.5" cy="9.5" r="1.35" fill="#f2c230"/><circle cx="22.0" cy="8.0" r="1.35" fill="#f2c230"/><circle cx="27.5" cy="9.5" r="1.35" fill="#f2c230"/><circle cx="31.5" cy="13.5" r="1.35" fill="#f2c230"/><text x="22" y="53" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-weight="700" font-size="17" fill="#fff">I</text></svg></span><input id="f-targa" name="targa" class="targa-campo" data-etichetta="Targa" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="8" placeholder="AB123CD"></div>
       <p class="aiuto">Serve solo a riconoscere il modello. Non è obbligatoria.</p></div>
+    <div class="campo"><label for="f-categoria">Tipo di problema</label><select id="f-categoria" name="categoria" data-etichetta="Tipo di problema" required><option value="">Scegli il tipo di problema</option><option>Batteria o auto che non parte</option><option>Spie accese e diagnosi</option><option>Tagliando e manutenzione</option><option>Freni, rumori o vibrazioni</option><option>Gomme e forature</option><option>Carrozzeria</option><option>Pre-revisione</option><option>Climatizzatore</option><option>Ricambi</option><option>Altro / non so quale sia il problema</option></select><p class="errore" aria-live="polite"></p></div>
     <div class="campo"><label for="f-comune">Dove si trova l'auto</label><input id="f-comune" name="comune" data-etichetta="Comune" required autocomplete="address-level2" placeholder="Es. Casale Monferrato"><p class="errore" aria-live="polite"></p></div>
     <div class="campo"><label for="f-problema">Cosa non va</label><textarea id="f-problema" name="problema" data-etichetta="Problema" rows="3" required placeholder="Es. si accende la spia del motore"></textarea><p class="errore" aria-live="polite"></p></div>
     <button class="btn btn--wa btn--pieno" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg>Invia su WhatsApp</button>
@@ -104,6 +105,6 @@ window.__LM={"demo": true, "reale": "2027-01-01T00:00:00+01:00", "vecchio": "../
 <script src="../assets/js/vendor/gsap.min.js" defer></script>
 <script src="../assets/js/vendor/ScrollTrigger.min.js" defer></script>
 <script src="../assets/js/vendor/lenis.min.js" defer></script>
-<script src="nuovo.js?v=154596bd29" defer></script>
+<script src="nuovo.js?v=c3550d0794" defer></script>
 </body>
 </html>

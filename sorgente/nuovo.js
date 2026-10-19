@@ -123,11 +123,17 @@
     return !t;
   }
   $$("form[data-modulo]").forEach(function (form) {
-    $$("input[required], textarea[required]", form).forEach(function (c) { c.addEventListener("blur", function () { if (c.value || c.type === "checkbox") controlla(c); }); });
+    $$("input[required], textarea[required], select[required]", form).forEach(function (c) {
+      c.addEventListener("blur", function () { if (c.value || c.type === "checkbox") controlla(c); });
+      // Correggi l'errore mentre si scrive, prima che il clic su Invia sposti il pulsante.
+      var aggiornaErrore = function () { if (c.hasAttribute("aria-invalid")) controlla(c); };
+      c.addEventListener("input", aggiornaErrore);
+      c.addEventListener("change", aggiornaErrore);
+    });
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var primo = null;
-      $$("input[required], textarea[required]", form).forEach(function (c) { if (!controlla(c) && !primo) primo = c; });
+      $$("input[required], textarea[required], select[required]", form).forEach(function (c) { if (!controlla(c) && !primo) primo = c; });
       if (primo) { primo.focus(); return; }
       var f = form.elements, righe = [form.getAttribute("data-intro") || "Ciao Luca,", ""];
       if (f.larghezza) righe.push("Misura: " + f.larghezza.value + "/" + f.spalla.value + " R" + f.cerchio.value);

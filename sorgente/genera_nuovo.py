@@ -5,6 +5,7 @@ Scrive le pagine in nuovo/ (demo, cartella dentro il sito attuale). Per metterlo
 Stili e script stanno in sorgente/nuovo.css e sorgente/nuovo.js (si copiano in uscita)."""
 import hashlib, json, math, os, sys
 from lancio_config import LANCIO_ISO
+from richiesta import sezione_richiesta, risorse_richiesta, opzioni_problema
 
 QUI = os.path.dirname(os.path.abspath(__file__))
 RADICE = os.path.dirname(QUI)
@@ -119,7 +120,7 @@ def head(pagina, titolo, descrizione, schema=None, noindex=False):
 window.__LM={json.dumps({"demo": DEMO and SOTTO, "reale": LANCIO_ISO, "vecchio": A + "index.html"})};</script>
 <link rel="preload" href="{A}assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="nuovo.css?v={ASSET_V}">
-{ld}</head>
+{risorse_richiesta(A) + chr(10) if pagina == "index.html" else ""}{ld}</head>
 <body>
 <a class="salta-link" href="#contenuto">Vai al contenuto</a>
 '''
@@ -144,8 +145,9 @@ def dialog_ritiro():
   <form data-modulo data-intro="Ciao Luca, vorrei far ritirare l'auto." novalidate>
     <button class="foglio-chiudi" type="button" aria-label="Chiudi" data-chiudi>×</button>
     <h2 id="foglio-t">Chiedi il ritiro dell'auto</h2>
-    <p class="piccolo">Tre dati e si apre WhatsApp con il messaggio già scritto.</p>
+    <p class="piccolo">Scegli il problema e indica dove si trova l'auto: la richiesta si prepara su WhatsApp.</p>
     {targa_campo("f-targa")}
+    <div class="campo"><label for="f-categoria">Tipo di problema</label><select id="f-categoria" name="categoria" data-etichetta="Tipo di problema" required>{opzioni_problema(True)}</select><p class="errore" aria-live="polite"></p></div>
     <div class="campo"><label for="f-comune">Dove si trova l'auto</label><input id="f-comune" name="comune" data-etichetta="Comune" required autocomplete="address-level2" placeholder="Es. Casale Monferrato"><p class="errore" aria-live="polite"></p></div>
     <div class="campo"><label for="f-problema">Cosa non va</label><textarea id="f-problema" name="problema" data-etichetta="Problema" rows="3" required placeholder="Es. si accende la spia del motore"></textarea><p class="errore" aria-live="polite"></p></div>
     <button class="btn btn--wa btn--pieno" type="submit">{I["chat"]}Invia su WhatsApp</button>
@@ -313,7 +315,7 @@ home = head("index.html", "Officina a Frassineto Po con ritiro e consegna | L.M.
   <div class="eroe-basso">
     <div class="eroe-testo" data-entra>
       <p><strong>La tua officina a Frassineto Po.</strong> Meccanica, gomme e ricambi. Porti tu l'auto, oppure la ritiro e te la riconsegno io.</p>
-      <div class="azioni"><a class="btn btn--arancio" href="contatti.html#scrivimi">Chiedi un preventivo</a><a class="btn btn--vuoto" href="ritiro-consegna.html">{I["pin"]}Ritiro e consegna</a></div>
+      <div class="azioni"><a class="btn btn--arancio" href="#richiesta">Descrivi il problema</a><a class="btn btn--vuoto" href="ritiro-consegna.html">{I["pin"]}Ritiro e consegna</a></div>
     </div>
     <a class="eroe-scorri" href="#la-nuova-officina">Scopri la nuova officina <span aria-hidden="true">↓</span></a>
   </div>
@@ -340,6 +342,8 @@ home = head("index.html", "Officina a Frassineto Po con ritiro e consegna | L.M.
     <p class="foto-nota">Foto dimostrative. Le immagini della nuova sede arriveranno con l'apertura.</p>
   </div>
 </section>
+
+{sezione_richiesta(sede_fissa=True)}
 
 <section class="rotta" id="ritiro" aria-labelledby="rotta-t">
   <div class="wrap rotta-griglia">
@@ -564,6 +568,7 @@ scrivi("contatti.html", head("contatti.html", "Contatti e preventivo gratuito | 
     </div>
     {targa_campo("c-targa")}
     <div class="campo"><label for="c-comune">Comune</label><input id="c-comune" name="comune" data-etichetta="Comune" autocomplete="address-level2" placeholder="Es. Casale Monferrato"></div>
+    <div class="campo"><label for="c-categoria">Tipo di problema</label><select id="c-categoria" name="categoria" data-etichetta="Tipo di problema" required>{opzioni_problema(True)}</select><p class="errore" aria-live="polite"></p></div>
     <div class="campo"><label for="c-msg">Descrivi il problema</label><textarea id="c-msg" name="messaggio" data-etichetta="Messaggio" rows="4" required placeholder="Es. l'auto non parte, la batteria sembra scarica"></textarea><p class="errore" aria-live="polite"></p></div>
     <label class="consenso"><input type="checkbox" name="privacy" required><span>Acconsento al trattamento dei miei dati per ricevere il preventivo, come descritto nell'<a href="privacy.html">informativa privacy</a>.</span></label>
     <p class="errore" aria-live="polite"></p>
