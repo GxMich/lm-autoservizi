@@ -1,4 +1,4 @@
-# L.M. Autoservizi — nuovo sito "Officina di notte"
+# L.M. Autoservizi — demo originale e anteprima nuova sede
 
 Sito statico multipagina: HTML, CSS e JavaScript, nessuna build. Si pubblica caricando la cartella così com'è
 (Netlify, Cloudflare Pages, Aruba...).
@@ -26,6 +26,47 @@ LM_PRODUZIONE=1 python sorgente/genera.py
 ```
 
 La demo è pubblicata con GitHub Pages dal ramo `main`. Il file `_headers` serve solo se si usa Netlify o Cloudflare Pages.
+
+## Due siti: quello attuale e quello nuovo
+- **Sito attuale (radice):** la demo originale, officina mobile a domicilio con il furgone. Ha in più una piccola sezione
+  "Anno nuovo. Una nuova sede." con un conto alla rovescia (`#nuova-sede` nella home).
+- **Sito nuovo (`nuovo/`):** anteprima della sede fissa a Frassineto Po, riallineata alla prima demo:
+  titoli grandi Archivo, ingranaggio del logo con una finestra fotografica, arancio e fondi scuri,
+  fascia inclinata e servizi con fotografie. Ritiro e consegna, gomme e ricambi e officina mobile hanno pagine proprie.
+  Il ritiro è spiegato in cinque passaggi, senza mappa illustrata. Restano il **pneumatico** con la misura e i moduli che preparano una richiesta su WhatsApp.
+  Si genera con `python sorgente/genera_nuovo.py` (modelli: `sorgente/nuovo.css`, `sorgente/nuovo.js`; usa GSAP, ScrollTrigger e Lenis da `assets/js/vendor/`).
+  Pagine: home, officina, ritiro e consegna, gomme e ricambi, officina mobile, chi sono, contatti, privacy, 404.
+  Con "riduci movimento" i contenuti restano accessibili. La prova della transizione richiede JavaScript.
+
+## Dal sito attuale al sito nuovo
+Il giorno di apertura **non è confermato**: Luca ha indicato inizio 2027. Il conto attuale segna l'arrivo del 2027,
+come dichiarato nella sezione, e non attiva un cambio automatico alla data provvisoria.
+- Configurazione unica in `sorgente/lancio_config.py`: `LANCIO_ISO` e `APERTURA_CONFERMATA = False`.
+  Quando Luca conferma il giorno, aggiornare data e flag e rigenerare entrambe le versioni.
+- Demo: **Prova il cambio di sito** fa correre il tempo fino a zero; l'ingranaggio si apre sul sito nuovo.
+  È l'unico comando per accedere all'anteprima dalla prima demo: non c'è un pulsante che salta la transizione.
+  Nessuna scelta viene salvata nel browser.
+- Nel sito nuovo **Sito attuale** riapre la prima demo; **Riprova il cambio** avvia una prova da 8 secondi.
+  `?tra=10` sulla home avvia una prova da 10 secondi. `?versione=attuale` mantiene sempre accessibile l'originale.
+- Il vecchio valore `lm-lancio` eventualmente presente nel browser viene ignorato.
+- Dopo la data ufficiale, con `APERTURA_CONFERMATA = True`, il sito in produzione con anteprima attiva porta a `nuovo/`.
+  La demo originale resta visitabile e ripetibile anche dopo la data.
+- File: `assets/css/lancio.css`, `assets/js/lancio.js`. Con "riduci movimento" si passa subito, senza animazione.
+- Il conto compare solo nella demo. `LM_PRODUZIONE=1` lo toglie; `LM_ANTEPRIMA=1` lo tiene senza i tasti demo.
+- Sul dominio vero il sito nuovo va alla radice: `LM_PRODUZIONE=1 LM_NUOVO_ROOT=1 python sorgente/genera_nuovo.py <cartella>`.
+
+## Da confermare con Luca (sito nuovo)
+Giorno di apertura, indirizzo effettivo e orari della nuova sede. Testi provvisori dagli appunti del progetto: climatizzatore (c'è l'attestato sui gas fluorurati), zona del ritiro,
+costo del ritiro, orari della sede, gomme e ricambi (cosa e come si vende), ponte. Il rimessaggio non c'è: si aggiunge se apre il capannone.
+Facebook e Instagram non ci sono perché Luca non li ha.
+
+I contenuti della nuova sede sono una proposta: servizi e condizioni vanno confermati prima della pubblicazione sul dominio definitivo.
+
+## Anteprima locale
+Avviare `python -m http.server 8765 --bind 127.0.0.1`, poi aprire:
+- `http://127.0.0.1:8765/` — demo originale con conto.
+- `http://127.0.0.1:8765/nuovo/` — nuova sede.
+- `http://127.0.0.1:8765/?tra=10#nuova-sede` — dimostrazione del passaggio.
 
 ## Animazioni (GSAP + ScrollTrigger + Lenis, in `assets/js/vendor/`)
 - Sipario arancione con l'ingranaggio all'apertura e tra una pagina e l'altra

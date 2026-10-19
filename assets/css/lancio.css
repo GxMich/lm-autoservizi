@@ -1,0 +1,38 @@
+/* ==========================================================================
+   Conto alla rovescia verso il sito nuovo (sezione della home) e trasformazione a zero.
+   Si aggiunge alla home con lancio.css + lancio.js; non tocca style.css né main.js.
+   ========================================================================== */
+
+/* ---------- Sezione "Dal 1° gennaio" ---------- */
+.nuova-sede .ns-griglia { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 28px clamp(28px, 5vw, 72px); align-items: center; }
+.nuova-sede h2 { font-size: clamp(1.9rem, 4vw, 3.4rem); }
+.nuova-sede .ns-testo p { color: #b9c0c7; font-size: 1.08rem; }
+.nuova-sede .ns-testo .btn { margin-top: 10px; }
+.nuova-sede .ns-data { color: var(--fanale); font-size: .92rem; }
+.ns-demo { grid-column: 1; grid-row: 2; padding-top: 24px; border-top: 1px solid var(--linea); }
+.ns-demo > span { font-weight: 600; font-size: .9rem; }
+.ns-demo .azioni { display: flex; flex-wrap: wrap; gap: 10px; }
+.nuova-sede .ns-demo p { font-size: .85rem; margin: 12px 0 0; color: var(--grigio); }
+.ns-demo .btn:disabled { cursor: wait; opacity: .7; }
+@media (max-width: 899px) { .nuova-sede .ns-griglia { grid-template-columns: 1fr; } }
+
+/* l'ingranaggio del logo con il conto nel foro */
+.ns-ruota { --D: min(78vw, 360px); grid-column: 2; grid-row: 1 / span 2; position: relative; width: var(--D); height: var(--D); justify-self: center; }
+@media (max-width: 899px) { .ns-ruota { grid-column: 1; grid-row: 2; } .ns-demo { grid-row: 3; } }
+.ns-gear { width: 100%; height: 100%; display: block; will-change: transform; }
+.conto { position: absolute; inset: 0; display: grid; place-items: center; font-size: calc(var(--D) * .135); color: var(--testo); }
+.conto-fila { display: grid; grid-template-columns: repeat(2, auto); gap: .18em .9em; text-align: center; }
+.conto-cella { display: flex; flex-direction: column; align-items: center; min-width: 1.5em; }
+.conto-cifre { font-stretch: 125%; font-weight: 800; line-height: .95; letter-spacing: -.02em; font-variant-numeric: tabular-nums; display: block; }
+.conto-cella small { font-size: max(.5rem, .13em); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--grigio); margin-top: .15em; }
+.conto-cella:last-child .conto-cifre { color: var(--arancio-vivo); }
+
+/* ---------- Trasformazione a schermo intero ---------- */
+html.lancio-ora { overflow: hidden; scrollbar-gutter: stable; }
+.lancio-ovr { position: fixed; inset: 0; z-index: 1000; pointer-events: none; }
+.lancio-ovr iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #f8f8f6; visibility: hidden; }
+.lancio-ovr svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lancio-ovr .ovr-cisiamo { position: absolute; left: 0; top: 0; margin: 0; max-width: none; transform: translate(-50%, -50%); opacity: 0; white-space: nowrap;
+  font-stretch: 125%; font-weight: 800; text-transform: uppercase; letter-spacing: -.02em; line-height: 1; color: var(--fanale); }
+@media (prefers-reduced-motion: reduce) { .lancio-ovr { display: none; } }
+@media print { .nuova-sede { display: none !important; } }

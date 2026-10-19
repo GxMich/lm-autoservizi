@@ -1,4 +1,5 @@
-import json, os, sys
+import hashlib, json, os, sys
+from lancio_config import LANCIO_ISO, APERTURA_CONFERMATA
 
 QUI = os.path.dirname(os.path.abspath(__file__))
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(QUI)
@@ -62,6 +63,33 @@ FURGONE = '''<div class="furgone"><svg viewBox="0 0 290 100" aria-hidden="true">
   <g transform="translate(166 86)"><g class="ruota"><circle r="13" fill="#0f1215"/><circle r="6.5" fill="#9aa3ab"/><path d="M-6.5 0h13M0-6.5v13" stroke="#0f1215" stroke-width="2"/></g></g>
 </svg></div>'''
 
+# ---------------------------------------------------------------- conto alla rovescia verso il sito nuovo
+# Il sito nuovo (sede fissa, ritiro e consegna) è in nuovo/ (sorgente/genera_nuovo.py). Questa home ha una piccola sezione con
+# il conto alla rovescia: allo zero l'ingranaggio si apre sul sito nuovo. Per cambiare la data: LANCIO_ISO.
+# ?tra=15 nell'indirizzo fa partire il conto da 15 secondi (prove). In demo c'è anche il tasto "Avvia il lancio".
+ANTEPRIMA = DEMO or os.environ.get("LM_ANTEPRIMA") == "1"
+LANCIO_SCRIPT = f"""<script>(function(){{var p=new URLSearchParams(location.search),s=p.get("tra"),q=s===null?NaN:Number(s),R=Date.parse("{LANCIO_ISO}"),demo={str(DEMO).lower()},confermato={str(APERTURA_CONFERMATA).lower()},attuale=p.get("versione")==="attuale",prova=demo&&Number.isFinite(q)&&q>=0&&q<=86400;window.__lancioDemo=demo;window.__lancioReale=R;window.__lancioT=prova?Date.now()+q*1000:R;window.__lancioAuto=prova||(confermato&&!attuale&&(!demo||R>Date.now()));if(confermato&&!demo&&!attuale&&R<=Date.now())location.replace("nuovo/index.html?salta=1")}})();</script>
+"""
+_CELLE = "".join(f'<div class="conto-cella"><span class="conto-cifre" data-u="{u}">00</span><small>{n}</small></div>' for u, n in [("g", "giorni"), ("o", "ore"), ("m", "minuti"), ("s", "secondi")])
+_COMANDO = '<div class="ns-demo"><span>Esplora la proposta</span><div class="azioni"><button class="btn btn--arancio" type="button" data-lancio-vai>Prova il cambio di sito</button></div><p>Puoi tornare alla demo attuale in qualsiasi momento.</p></div>' if DEMO else ""
+NUOVA_SEDE = f"""<section class="sezione sezione--asfalto nuova-sede" id="nuova-sede" aria-labelledby="ns-titolo" data-gear="{GEAR_PIENO}">
+  <div class="wrap ns-griglia">
+    <div class="ns-testo">
+      <p class="occhiello">Novità</p>
+      <h2 id="ns-titolo" data-split>Anno nuovo.<br>Una nuova sede.</h2>
+      <p>A inizio 2027, l'officina fissa a Frassineto Po: più spazio per la tua auto, gomme e ricambi, con ritiro e consegna. L'officina mobile continua ad arrivare da te.</p>
+      <p class="ns-data">Il conto ci accompagna al 2027. Il giorno di apertura è in definizione.</p>
+    </div>
+    <div class="ns-ruota" role="timer" aria-label="Tempo che manca al 2027, il giorno di apertura della sede è da confermare">
+      <svg class="ns-gear" viewBox="-300 -300 600 600" aria-hidden="true"><circle r="197" fill="#0b0d10"/><path fill="#dc4f2b" fill-rule="evenodd" d="{GEAR_PIENO}"/><circle r="197" fill="none" stroke="#ffd9a0" stroke-width="3" opacity=".7"/></svg>
+      <div class="conto"><div class="conto-fila">{_CELLE}</div></div>
+    </div>
+    {_COMANDO}
+  </div>
+  <noscript><style>.nuova-sede .ns-ruota,.nuova-sede .ns-demo{{display:none}}.nuova-sede .ns-griglia{{display:block}}</style><div class="wrap"><p>Per provare il passaggio alla nuova sede, attiva JavaScript nel browser.</p></div></noscript>
+</section>
+""" if ANTEPRIMA else ""
+
 NAV = [("index.html", "Home"), ("servizi.html", "Servizi"), ("come-funziona.html", "Come funziona"),
        ("chi-sono.html", "Chi sono"), ("contatti.html", "Contatti")]
 
@@ -86,6 +114,7 @@ def head(pagina, titolo, descrizione, extra_schema=None, noindex=False):
     ld = "\n".join('<script type="application/ld+json">' + json.dumps(s, ensure_ascii=False) + "</script>" for s in [SCHEMA] + (extra_schema or []))
     canon = '<meta name="robots" content="noindex">' if noindex else f'<link rel="canonical" href="{url}">'
     if DEMO and not noindex: canon += '\n<meta name="robots" content="noindex, nofollow">'
+    lancio_script = LANCIO_SCRIPT if ANTEPRIMA and not noindex else ""
     return f'''<!doctype html>
 <html lang="it" class="no-js">
 <head>
@@ -112,7 +141,7 @@ def head(pagina, titolo, descrizione, extra_schema=None, noindex=False):
 <script>(function(d){{d.classList.remove("no-js");d.classList.add("js");if(matchMedia("(prefers-reduced-motion: reduce)").matches)d.classList.add("no-motion");else d.classList.add("anim")}})(document.documentElement);</script>
 <link rel="preload" href="assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/style.css">
-{ld}
+{lancio_script}{ld}
 </head>
 <body>
 <a class="skip-link" href="#contenuto">Vai al contenuto</a>
@@ -372,6 +401,7 @@ home = head("index.html",
   </div>
 </section>
 ''' + marquee(["Elettrauto", "Meccanico", "Gommista", "Carrozzeria", "Pre-revisioni", "Diagnosi centraline", "Consulenza imprese"], storto=True) + f'''
+{NUOVA_SEDE}
 <section class="sezione sezione--chiara" aria-label="Il servizio">
   <div class="wrap">
     <p class="occhiello">Officina mobile</p>
@@ -481,6 +511,11 @@ home = head("index.html",
   </div>
 </section>
 ''' + finale() + footer()
+if ANTEPRIMA:
+    asset_root = os.path.dirname(QUI)
+    lancio_v = hashlib.sha256(b"".join(open(os.path.join(asset_root, p), "rb").read() for p in ("assets/css/lancio.css", "assets/js/lancio.js"))).hexdigest()[:10]
+    home = home.replace('<link rel="stylesheet" href="assets/css/style.css">'+'\n', '<link rel="stylesheet" href="assets/css/style.css">' + f'\n<link rel="stylesheet" href="assets/css/lancio.css?v={lancio_v}">\n', 1)
+    home = home.replace('<script src="assets/js/main.js" defer></script>', '<script src="assets/js/main.js" defer></script>' + f'\n<script src="assets/js/lancio.js?v={lancio_v}" defer></script>', 1)
 scrivi("index.html", home)
 
 # ================================================================== SERVIZI
