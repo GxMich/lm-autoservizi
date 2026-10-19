@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: "Archivo";
-  src: url("../assets/fonts/archivo-latin.woff2") format("woff2");
+  src: url("assets/fonts/archivo-latin.woff2") format("woff2");
   font-weight: 400 800;
   font-stretch: 100% 125%;
   font-display: swap;
@@ -186,6 +186,7 @@ h3 { font-size: 1.25rem; letter-spacing: -.02em; line-height: 1.12; }
 .eroe-aloni circle { fill: none; stroke: rgba(255, 92, 43, .28); stroke-width: 1; }
 .eroe-finestra { width: 66.7%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: var(--asfalto); box-shadow: 0 40px 120px -30px rgba(255, 92, 43, .4); }
 .eroe-finestra img { width: 100%; height: 100%; object-fit: cover; }
+.eroe-finestra img { object-position: 50% 55%; }
 .eroe-anello { width: 100%; height: 100%; color: #dc4f2b; }
 .eroe-righe { position: absolute; inset: 0; display: flex; align-items: center; padding-inline: var(--gutter); pointer-events: none; }
 .eroe h1 { width: 100%; margin: 0 0 6vh; font-size: clamp(3rem, 8.55vw, 9.5rem); line-height: .94; text-transform: uppercase; letter-spacing: -.04em; }
@@ -360,6 +361,7 @@ h3 { font-size: 1.25rem; letter-spacing: -.02em; line-height: 1.12; }
 /* ---------- Officina mobile, recensioni, dove, finale ---------- */
 .mobile-sez { background: var(--notte); padding-block: clamp(56px, 8vw, 112px); }
 .mobile-griglia { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(28px, 6vw, 88px); align-items: center; }
+.mobile-griglia > div > h2:last-child { margin-bottom: 0; }
 .mobile-foto { margin: 0; aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: var(--asfalto-2); box-shadow: 0 0 0 10px rgba(255, 92, 43, .14), 0 40px 100px -30px rgba(255, 92, 43, .5); max-width: 440px; width: 100%; justify-self: center; }
 .mobile-foto img { width: 100%; height: 100%; object-fit: cover; }
 .h2-sotto { margin-top: 1.4em; font-size: clamp(1.4rem, 2.4vw, 1.9rem); }
@@ -383,6 +385,8 @@ h3 { font-size: 1.25rem; letter-spacing: -.02em; line-height: 1.12; }
 .dove-sez { background: var(--notte); padding-block: clamp(56px, 8vw, 112px); }
 .dove { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
 .indirizzo { font-size: 1.3rem; font-weight: 700; line-height: 1.35; }
+.arrivo h3 { font-size: clamp(1.4rem, 2.4vw, 1.9rem); }
+.arrivo .btn { margin-block: 6px 20px; }
 .orari { border-collapse: collapse; margin: 0 0 16px; }
 .orari th, .orari td { text-align: left; padding: 10px 24px 10px 0; border-bottom: 1px solid var(--linea); font-weight: 400; }
 .orari th { font-weight: 700; }
@@ -501,26 +505,10 @@ h3 { font-size: 1.25rem; letter-spacing: -.02em; line-height: 1.12; }
   .barra svg { width: 1.15em; height: 1.15em; }
 }
 
-/* ---------- Navigazione tra le due versioni, presente solo nella demo ---------- */
-.demo-nav { position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; z-index: 45; display: flex; align-items: center; gap: 8px; padding: 5px 7px 5px 18px; border: 1px solid #78503b; border-radius: 999px; background: #191b1f; box-shadow: 0 12px 30px -12px rgba(0,0,0,.7); white-space: nowrap; }
-.demo-nav > span { color: var(--grigio); font-size: .76rem; margin-right: 6px; }
-.demo-nav a { display: flex; align-items: center; min-height: 44px; padding: 8px 14px; border-radius: 999px; color: var(--testo); font-size: .82rem; font-weight: 600; text-decoration: none; }
-.demo-nav a:last-child { background: var(--fanale); color: var(--notte); }
-.demo-nav a:hover { background: var(--arancio); color: #fff; }
-.demo-nav[hidden] { display: none; }
-.piede { padding-bottom: 80px; }
-@media (max-width: 899px) {
-  .demo-nav { position: static; transform: none; width: max-content; max-width: calc(100% - 28px); margin: 20px auto 100px; padding-left: 7px; }
-  .demo-nav > span { display: none; }
-  .piede { padding-bottom: 20px; }
-  .eroe-meta { align-items: flex-start; }
-  .eroe-meta a { max-width: 15ch; }
-}
-
 /* ---------- Ingresso: stati iniziali (li scioglie nuovo.js; senza movimento o senza JS la pagina è completa) ---------- */
 .js:not(.salta):not(.fermo) .riga > span { transform: translateY(112%); }
 .js:not(.salta):not(.fermo) [data-entra] { opacity: 0; transform: translateY(22px); }
 .js:not(.salta):not(.fermo) [data-rivela] { opacity: 0; transform: translateY(28px); }
 .fermo .auto .ruota, .fermo .g-rotante, .fermo .punto::after { animation: none; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
-@media print { .testata, .barra, .finale, .piede, .demo-nav { display: none !important; } body { background: #fff; color: #000; } }
+@media print { .testata, .barra, .finale, .piede { display: none !important; } body { background: #fff; color: #000; } }

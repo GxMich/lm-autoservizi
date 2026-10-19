@@ -173,15 +173,6 @@
     });
   });
 
-  /* ---------- Mappa su richiesta ---------- */
-  $$("[data-mappa]").forEach(function (b) {
-    b.addEventListener("click", function () {
-      var box = b.closest(".mappa"), f = document.createElement("iframe");
-      f.src = box.getAttribute("data-src"); f.title = "Mappa: L.M. Autoservizi, Via Ticineto 15, Frassineto Po"; f.loading = "lazy"; f.referrerPolicy = "no-referrer-when-downgrade";
-      $(".mappa-consenso", box).remove(); box.appendChild(f);
-    });
-  });
-
   /* ---------- Attestati ingranditi ---------- */
   var dialog = $("#lightbox");
   if (dialog && typeof dialog.showModal === "function") {
@@ -212,9 +203,6 @@
     $$(".ponte-indice button", ponte).forEach(function (b, i) { b.addEventListener("click", function () { ponteApi.vai(i); }); });
     seleziona(0);
   }
-
-  // I comandi della demo sono link nell'HTML: funzionano anche senza JavaScript.
-  if (window !== window.top) { var demoNav = $(".demo-nav"); if (demoNav) demoNav.hidden = true; }
 
   if (!MOTO) return;
 
@@ -269,12 +257,7 @@
     var intro = $(".intro-pagina .lead");
     if (intro) tl.fromTo(intro, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .9 }, .4);
   }
-  if (SALTA) { /* si arriva dal conto alla rovescia: la pagina è già in scena */ }
-  else if (H.classList.contains("attesa")) {
-    var via = function () { H.classList.remove("attesa"); parti(); };
-    window.addEventListener("message", function (e) { if (e.origin === location.origin && e.data === "lm-via") via(); });
-    setTimeout(via, 9000);
-  } else parti();
+  if (!SALTA) parti();
 
   // Il logo continua il movimento della prima demo, con uno scroll libero.
   var gearHero = $(".eroe-ingranaggio");

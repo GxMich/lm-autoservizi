@@ -1,17 +1,15 @@
-"""Sito nuovo di L.M. Autoservizi: officina fissa a Frassineto Po, con ritiro e consegna.
-Si genera con:  python sorgente/genera_nuovo.py
-Scrive le pagine in nuovo/ (demo, cartella dentro il sito attuale). Per metterlo alla radice del dominio:
-    LM_PRODUZIONE=1 LM_NUOVO_ROOT=1 python sorgente/genera_nuovo.py <cartella-di-uscita>
-Stili e script stanno in sorgente/nuovo.css e sorgente/nuovo.js (si copiano in uscita)."""
+"""Sito dell'officina già operativa. Generazione: python sorgente/genera_nuovo.py.
+Scrive alla radice e mantiene i vecchi URL con pagine di reindirizzamento.
+LM_PRODUZIONE=1 abilita l'indicizzazione sul dominio definitivo.
+Stili e script: sorgente/nuovo.css e sorgente/nuovo.js."""
 import hashlib, json, math, os, sys
-from lancio_config import LANCIO_ISO
+from html import escape
 from richiesta import sezione_richiesta, risorse_richiesta, opzioni_problema
 
 QUI = os.path.dirname(os.path.abspath(__file__))
 RADICE = os.path.dirname(QUI)
-SOTTO = os.environ.get("LM_NUOVO_ROOT") != "1"          # demo: il sito nuovo vive in nuovo/, accanto al vecchio
-OUT = sys.argv[1] if len(sys.argv) > 1 else (os.path.join(RADICE, "nuovo") if SOTTO else RADICE)
-A = "../" if SOTTO else ""                              # percorso verso assets/ (foto, font, logo, librerie)
+OUT = sys.argv[1] if len(sys.argv) > 1 else RADICE
+A = ""
 DEMO = os.environ.get("LM_PRODUZIONE") != "1"
 DOMINIO = "https://www.lmautoservizi.it"
 TEL, TEL_TXT = "+393426436085", "342 643 6085"
@@ -19,8 +17,8 @@ WA = "https://wa.me/393426436085?text=Ciao%20Luca%2C%20vorrei%20informazioni."
 EMAIL = "lucamiglietta4@gmail.com"
 PEC = "lucamiglie@pec.it"
 MAPS = "https://maps.app.goo.gl/MKwoz3CKAvCdeNwj8"
-DIREZIONI = "https://www.google.com/maps/dir/?api=1&destination=45.1284713,8.5431679"
-EMBED = "https://www.google.com/maps?q=L.M.%20Autoservizi%20di%20Miglietta%20Luca%2C%20Via%20Ticineto%2015%2C%20Frassineto%20Po&ll=45.1284713,8.5431679&z=13&output=embed"
+# Il biglietto conferma questo indirizzo come sede legale, non come officina.
+SEDE_LEGALE = "Via Ticineto 15, 15040 Frassineto Po (AL)"
 GEAR = open(os.path.join(QUI, "ingranaggio.txt"), encoding="utf-8").read().strip()
 GEAR_PIENO = f"{GEAR} M197 0A197 197 0 1 0 -197 0A197 197 0 1 0 197 0Z"
 ASSET_V = hashlib.sha256(b"".join(open(os.path.join(QUI, f), "rb").read() for f in ("nuovo.css", "nuovo.js"))).hexdigest()[:10]
@@ -116,8 +114,7 @@ def head(pagina, titolo, descrizione, schema=None, noindex=False):
 <meta property="og:image" content="{DOMINIO}/assets/img/og-image.jpg">
 <link rel="icon" type="image/png" sizes="32x32" href="{A}assets/img/favicon-32.png">
 <link rel="apple-touch-icon" href="{A}assets/img/favicon-180.png">
-<script>(function(d){{d.classList.add("js");try{{var q=location.search;if(/salta=1/.test(q))d.classList.add("salta");else if(/lancio=1/.test(q)&&window!==window.top)d.classList.add("attesa");if(matchMedia("(prefers-reduced-motion: reduce)").matches)d.classList.add("fermo")}}catch(e){{}}setTimeout(function(){{if(!window.__nuovoPronto)d.classList.add("salta")}},6000)}})(document.documentElement);
-window.__LM={json.dumps({"demo": DEMO and SOTTO, "reale": LANCIO_ISO, "vecchio": A + "index.html"})};</script>
+<script>(function(d){{d.classList.add("js");try{{if(/salta=1/.test(location.search))d.classList.add("salta");if(matchMedia("(prefers-reduced-motion: reduce)").matches)d.classList.add("fermo")}}catch(e){{}}setTimeout(function(){{if(!window.__nuovoPronto)d.classList.add("salta")}},6000)}})(document.documentElement);</script>
 <link rel="preload" href="{A}assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="nuovo.css?v={ASSET_V}">
 {risorse_richiesta(A) + chr(10) if pagina == "index.html" else ""}{ld}</head>
@@ -160,7 +157,7 @@ def dialog_ritiro():
 
 def footer(dialog=True):
     voci = "".join(f'<li><a href="{h}">{t}</a></li>' for h, t in NAV)
-    comandi_demo = f'''<nav class="demo-nav" aria-label="Esplora le due versioni"><span>Anteprima nuova sede</span><a href="{A}index.html?versione=attuale">Sito attuale</a><a href="{A}index.html?tra=8#nuova-sede">Riprova il cambio</a></nav>''' if DEMO and SOTTO else ""
+    ritiro_barra = f'<button type="button" data-apri="ritiro">{I["pin"]}Ritiro</button>' if dialog else f'<a href="ritiro-consegna.html">{I["pin"]}Ritiro</a>'
     return f'''</main>
 <footer class="piede">
   <div class="wrap piede-griglia">
@@ -173,8 +170,8 @@ def footer(dialog=True):
       <li><a href="tel:{TEL}">{TEL_TXT}</a></li>
       <li><a href="{WA}" target="_blank" rel="noopener">WhatsApp</a></li>
       <li><a href="mailto:{EMAIL}">{EMAIL}</a></li></ul></div>
-    <div><h2>Officina</h2><ul>
-      <li>Via Ticineto 15<br>15040 Frassineto Po (AL)</li>
+    <div><h2>Sede legale</h2><ul>
+      <li>{SEDE_LEGALE}</li>
       <li>Lunedì–venerdì<br>7:30–19:30 continuato</li>
       <li><span class="stato" data-stato></span></li></ul></div>
   </div>
@@ -183,9 +180,8 @@ def footer(dialog=True):
 <nav class="barra" aria-label="Azioni rapide">
   <a href="tel:{TEL}">{I["tel"]}Chiama</a>
   <a href="{WA}" target="_blank" rel="noopener">{I["chat"]}WhatsApp</a>
-  <button type="button" data-apri="ritiro">{I["pin"]}Ritiro</button>
+  {ritiro_barra}
 </nav>
-{comandi_demo}
 {dialog_ritiro() if dialog else ""}<script src="{A}assets/js/vendor/gsap.min.js" defer></script>
 <script src="{A}assets/js/vendor/ScrollTrigger.min.js" defer></script>
 <script src="{A}assets/js/vendor/lenis.min.js" defer></script>
@@ -196,7 +192,7 @@ def footer(dialog=True):
 
 
 def scrivi(nome, contenuto):
-    os.makedirs(OUT, exist_ok=True)
+    os.makedirs(os.path.dirname(os.path.join(OUT, nome)), exist_ok=True)
     with open(os.path.join(OUT, nome), "w", encoding="utf-8", newline="\n") as f:
         f.write(contenuto)
     print("scritto", nome, len(contenuto))
@@ -225,10 +221,10 @@ ORARI = '''<table class="orari"><caption class="sr">Orari di apertura</caption>
   <tr data-giorni="1,2,3,4,5"><th scope="row">Lunedì–venerdì</th><td>7:30–19:30, continuato</td></tr>
   <tr data-giorni="6,0"><th scope="row">Sabato e domenica</th><td>Chiuso</td></tr></table>'''
 
-MAPPA = f'''<div class="mappa" data-src="{EMBED}">
-  <div class="mappa-consenso">{I["pin"]}<p>La mappa è di Google, che può impostare cookie. Si carica solo se lo chiedi.</p>
-    <button class="btn btn--vuoto btn--piccolo" type="button" data-mappa>Mostra la mappa</button>
-    <a href="{DIREZIONI}" target="_blank" rel="noopener">Apri il percorso su Google Maps</a></div></div>'''
+ARRIVO = f'''<div class="riquadro arrivo">
+  <h3>Passa in officina</h3><p>L'officina è già operativa a Frassineto Po. Chiamami prima di passare: concordiamo l'intervento e ti do tutte le indicazioni per raggiungermi.</p>
+  <a class="btn btn--arancio" href="tel:{TEL}">{I["tel"]}Chiama {TEL_TXT}</a>
+  <p class="piccolo">Non riesci a portare l'auto? Possiamo organizzare il ritiro a casa o al lavoro.</p></div>'''
 
 
 def finale(titolo="Hai un'auto da sistemare?", testo="Chiama o scrivi: ti dico quando posso ritirarla o quando puoi portarmela."):
@@ -271,8 +267,7 @@ SCHEMA = {"@context": "https://schema.org", "@type": "AutoRepair", "@id": DOMINI
           "description": "Officina a Frassineto Po: meccanica, elettronica, gomme e carrozzeria, con ritiro e consegna dell'auto, vettura di cortesia gratuita e officina mobile.",
           "url": DOMINIO + "/", "telephone": TEL, "email": EMAIL, "vatID": "IT02625920067",
           "founder": {"@type": "Person", "name": "Luca Miglietta"},
-          "address": {"@type": "PostalAddress", "streetAddress": "Via Ticineto 15", "postalCode": "15040", "addressLocality": "Frassineto Po", "addressRegion": "AL", "addressCountry": "IT"},
-          "geo": {"@type": "GeoCoordinates", "latitude": 45.1284713, "longitude": 8.5431679}, "hasMap": MAPS,
+          "address": {"@type": "PostalAddress", "addressLocality": "Frassineto Po", "addressRegion": "AL", "addressCountry": "IT"},
           "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "07:30", "closes": "19:30"}],
           "paymentAccepted": "Contanti, Carta di credito, Bancomat",
           "areaServed": [{"@type": "City", "name": "Frassineto Po"}, {"@type": "City", "name": "Casale Monferrato"}]}
@@ -296,16 +291,15 @@ RECENSIONI = [("Un servizio inimitabile! Ritira la tua auto direttamente da casa
               ("Adoro il suo modo di lavorare, sempre impeccabile, grazie!", "Giacomo")]
 rec = "".join(f'<figure class="voce"><span class="virgolette" aria-hidden="true">“</span><blockquote><p>{t}</p></blockquote><figcaption>{n}</figcaption></figure>' for t, n in RECENSIONI)
 
-ritorno_demo = f'<a href="{A}index.html?versione=attuale">Torna alla demo originale</a>' if DEMO and SOTTO else '<span>Frassineto Po</span>'
 home = head("index.html", "Officina a Frassineto Po con ritiro e consegna | L.M. Autoservizi",
             "Officina di Luca Miglietta a Frassineto Po: meccanica, elettronica, gomme e carrozzeria su auto di tutte le marche. Ritiro e consegna con vettura di cortesia gratuita.", [SCHEMA]) + header("index.html") + f'''
 <section class="eroe" aria-labelledby="eroe-t">
   <div class="eroe-luce" aria-hidden="true"></div>
-  <div class="wrap eroe-meta">{ritorno_demo}<span>La nuova sede, a inizio 2027</span></div>
+  <div class="wrap eroe-meta"><span>Frassineto Po</span><span>Officina già operativa</span></div>
   <div class="eroe-scena" aria-hidden="true">
     <div class="eroe-ingranaggio">
       <svg class="eroe-aloni" viewBox="-400 -400 800 800"><circle r="340"/><circle r="390"/></svg>
-      <div class="eroe-finestra"><img src="{A}assets/img/foto/meccanico.webp" width="960" height="640" alt="" fetchpriority="high"></div>
+      <div class="eroe-finestra"><img src="{A}assets/img/officina-reale.jpeg" width="1536" height="2048" alt="" fetchpriority="high"></div>
       <svg class="eroe-anello" viewBox="-300 -300 600 600"><path fill="currentColor" fill-rule="evenodd" d="{GEAR_PIENO}"/></svg>
     </div>
   </div>
@@ -314,7 +308,7 @@ home = head("index.html", "Officina a Frassineto Po con ritiro e consegna | L.M.
   </div>
   <div class="eroe-basso">
     <div class="eroe-testo" data-entra>
-      <p><strong>La tua officina a Frassineto Po.</strong> Meccanica, gomme e ricambi. Porti tu l'auto, oppure la ritiro e te la riconsegno io.</p>
+      <p><strong>La tua officina a Frassineto Po.</strong> Meccanica, elettronica e vendita di gomme e ricambi. Porti tu l'auto, oppure la ritiro e te la riconsegno io.</p>
       <div class="azioni"><a class="btn btn--arancio" href="#richiesta">Descrivi il problema</a><a class="btn btn--vuoto" href="ritiro-consegna.html">{I["pin"]}Ritiro e consegna</a></div>
     </div>
     <a class="eroe-scorri" href="#la-nuova-officina">Scopri la nuova officina <span aria-hidden="true">↓</span></a>
@@ -327,7 +321,7 @@ home = head("index.html", "Officina a Frassineto Po con ritiro e consegna | L.M.
   <div class="wrap">
     <p class="segnale">L.M. Autoservizi cresce</p>
     <h2 id="nuova-intro-t" class="promessa">Un posto nuovo per la tua auto.<br>La stessa persona a cui affidarla.</h2>
-    <div class="intro-dettagli"><p>Mi conosci per l'officina che arriva da te. Ora il progetto continua con una sede fissa a Frassineto Po: un punto di riferimento per la manutenzione della tua auto, con la comodità del ritiro e della riconsegna.</p><p>Parli sempre con me, Luca. Valutiamo il lavoro, concordiamo il preventivo e scegliamo insieme come organizzare l'intervento.</p></div>
+    <div class="intro-dettagli"><p>Mi conosci per l'officina che arriva da te. Oggi ti accolgo anche nella sede fissa a Frassineto Po, già operativa: un punto di riferimento per la manutenzione della tua auto, con la comodità del ritiro e della riconsegna.</p><p>Parli sempre con me, Luca. Valutiamo il lavoro, concordiamo un preventivo personalizzato e scegliamo insieme come organizzare l'intervento. Lavoro su auto di tutte le marche e offro anche consulenza alle imprese del settore automobilistico.</p></div>
     <dl class="nuovi-numeri"><div><dt>10<span>+</span></dt><dd>Anni di esperienza multimarca</dd></div><div><dt>0<span>€</span></dt><dd>Per il preventivo e la vettura di cortesia</dd></div><div><dt>Luca</dt><dd>Il tuo riferimento, dall'inizio alla fine</dd></div></dl>
   </div>
 </section>
@@ -336,10 +330,10 @@ home = head("index.html", "Officina a Frassineto Po con ritiro e consegna | L.M.
   <div class="wrap">
     <div class="servizi-nuovi-testa"><h2 id="servizi-nuovi-t">Più spazio.<br>Più possibilità.</h2><p class="lead">L'officina fissa e i servizi che già conosci, insieme. Scegli cosa ti serve.</p></div>
     <div class="servizi-foto">
-      <a class="servizio-foto" href="officina.html"><img src="{A}assets/img/foto/meccanico.webp" width="960" height="640" alt="Dettaglio delle parti meccaniche di un motore" loading="lazy"><div><h3>In officina</h3><p>Manutenzione, diagnosi, elettrauto e cura della tua auto.</p><span>Scopri i servizi {I["freccia"]}</span></div></a>
-      <a class="servizio-foto" href="gomme-ricambi.html"><img src="{A}assets/img/foto/gommista.webp" width="960" height="640" alt="Dettaglio di ruota e pneumatico di un'auto" loading="lazy"><div><h3>Gomme e ricambi</h3><p>Disponibilità, preventivo e montaggio, in un unico posto.</p><span>Chiedi quello che ti serve {I["freccia"]}</span></div></a>
+      <a class="servizio-foto servizio-foto--officina" href="officina.html"><img src="{A}assets/img/officina-reale.jpeg" width="1536" height="2048" alt="L'officina L.M. Autoservizi con un'auto sul ponte sollevatore" loading="lazy"><div><h3>In officina</h3><p>Meccanica, diagnosi, elettrauto, carrozzeria e pre-revisione.</p><span>Scopri i servizi {I["freccia"]}</span></div></a>
+      <a class="servizio-foto" href="gomme-ricambi.html"><img src="{A}assets/img/foto/gommista.webp" width="960" height="640" alt="Dettaglio dimostrativo di ruota e pneumatico" loading="lazy"><div><h3>Gomme e ricambi</h3><p>Vendita di pneumatici e ricambi, con preventivo e montaggio.</p><span>Chiedi quello che ti serve {I["freccia"]}</span></div></a>
     </div>
-    <p class="foto-nota">Foto dimostrative. Le immagini della nuova sede arriveranno con l'apertura.</p>
+    <p class="foto-nota">La foto dell'officina è reale. L'immagine degli pneumatici è dimostrativa.</p>
   </div>
 </section>
 
@@ -359,8 +353,8 @@ home = head("index.html", "Officina a Frassineto Po con ritiro e consegna | L.M.
 <section class="gomme-sez" id="gomme" aria-labelledby="gomme-t">
   <div class="wrap gomme-griglia">
     <div class="gomme-testo">
-      <h2 id="gomme-t">Gomme e ricambi</h2>
-      <p class="lead">Dimmi la misura dei pneumatici: ti rispondo con disponibilità e prezzo. Al montaggio penso io, in officina.</p>
+      <h2 id="gomme-t">Vendita gomme<br>e ricambi</h2>
+      <p class="lead">Pneumatici e ricambi per la tua auto. Dimmi cosa cerchi: ti rispondo con disponibilità e prezzo. Al montaggio penso io, in officina.</p>
       {{MISURA}}
     </div>
     <div class="gomme-disegno">{gomma_svg()}</div>
@@ -369,9 +363,8 @@ home = head("index.html", "Officina a Frassineto Po con ritiro e consegna | L.M.
 
 <section class="mobile-sez" aria-labelledby="mobile-t">
   <div class="wrap mobile-griglia">
-    <figure class="mobile-foto"><img src="{A}assets/img/furgone-720.webp" alt="Il furgone officina mobile di L.M. Autoservizi" width="720" height="720" loading="lazy"></figure>
+    <div><p class="segnale">Il servizio a domicilio continua</p><h2 id="mobile-t">C'è anche<br>l'officina mobile</h2></div>
     <div>
-      <h2 id="mobile-t">C'è anche l'officina mobile</h2>
       <p class="lead">Per forature, cambio delle ruote montate, diagnosi e piccoli interventi, arrivo io dove sei rimasto fermo. Se il lavoro richiede il ponte, ritiro l'auto.</p>
       <p><a class="link" href="officina-mobile.html">Cosa faccio sul posto {I["freccia"]}</a></p>
     </div>
@@ -391,12 +384,12 @@ home = head("index.html", "Officina a Frassineto Po con ritiro e consegna | L.M.
   <div class="wrap dove">
     <div>
       <h2 id="dove-t">Dove e quando</h2>
-      <p class="indirizzo">Via Ticineto 15<br>15040 Frassineto Po (AL)</p>
+      <p class="indirizzo">Officina a Frassineto Po (AL)</p>
       {ORARI}
       <p><span class="stato" data-stato></span></p>
       <p class="piccolo">Ritiro e riconsegno l'auto a Casale Monferrato e nei paesi vicini. Chiama per sapere se passo anche da te.</p>
     </div>
-    {MAPPA}
+    {ARRIVO}
   </div>
 </section>
 ''' + finale() + footer()
@@ -438,14 +431,14 @@ DETT = [
      ["Carrozzeria e sistemazioni varie", "Verniciatura", "Saldatura"]),
     ("revisione", "Pre-revisione", "Non farti trovare impreparato: ti controllo l'auto gratis prima della revisione periodica e ti prenoto la revisione.",
      ["Controllo generale gratuito", "Prenotazione della revisione", "Sono abilitato come responsabile tecnico delle revisioni"]),
-    ("aziende", "Per le aziende", "Consulenza per le imprese che operano nel settore automobilistico. Ne parliamo e capiamo insieme di cosa hai bisogno.",
+    ("aziende", "Consulenza alle imprese", "Consulenza per le imprese che operano nel settore automobilistico. Ne parliamo e capiamo insieme di cosa hai bisogno.",
      ["Un tecnico con esperienza decennale multimarca", "Un confronto su misura per la tua attività"]),
 ]
 indice = "".join(f'<li><a href="#{a}">{t}</a></li>' for a, t, _, _ in DETT)
 sezioni = "".join(f'''<article class="dettaglio" id="{a}" data-rivela><h2>{t}</h2><p>{d}</p><ul class="spunte">{"".join(f"<li>{I['check']}{p}</li>" for p in pt)}</ul>
-  <p><button class="link-btn" type="button" data-apri="ritiro">Chiedi un preventivo</button></p></article>''' for a, t, d, pt in DETT)
+  <p><a class="link" href="contatti.html#scrivimi">Chiedi un preventivo</a></p></article>''' for a, t, d, pt in DETT)
 scrivi("officina.html", head("officina.html", "Cosa si fa in officina a Frassineto Po | L.M. Autoservizi",
-      "Tagliando, diagnosi centraline, elettrauto, climatizzatore, gomme, carrozzeria e pre-revisione a Frassineto Po. Preventivo gratuito.", [SCHEMA]) + header("officina.html")
+      "Manutenzione multimarca, diagnosi centraline, elettrauto, gomme, carrozzeria, pre-revisione e consulenza alle imprese. Officina già operativa a Frassineto Po.", [SCHEMA]) + header("officina.html")
       + intro_pagina("In officina", "Tutto quello che serve alla tua auto, su auto di tutte le marche. Preventivo gratuito dopo la diagnosi.") + f'''
 <section class="sezione"><div class="wrap documento">
   <nav class="indice" aria-label="In questa pagina"><p class="indice-t">In questa pagina</p><ul>{indice}</ul></nav>
@@ -473,11 +466,11 @@ scrivi("ritiro-consegna.html", head("ritiro-consegna.html", "Ritiro e consegna d
 
 # ================================================================== GOMME E RICAMBI
 scrivi("gomme-ricambi.html", head("gomme-ricambi.html", "Gomme e ricambi a Frassineto Po | L.M. Autoservizi",
-      "Pneumatici e ricambi per la tua auto, con montaggio, equilibratura e convergenza in officina a Frassineto Po. Chiedi disponibilità e prezzo.", [SCHEMA]) + header("gomme-ricambi.html")
-      + intro_pagina("Gomme e ricambi", "Dimmi la misura o la targa: ti rispondo con disponibilità e prezzo. Il montaggio lo faccio io, in officina.") + f'''
+      "Vendita di gomme e ricambi per auto a Frassineto Po, con montaggio, equilibratura e convergenza in officina. Chiedi disponibilità e prezzo.", [SCHEMA]) + header("gomme-ricambi.html")
+      + intro_pagina("Gomme e ricambi", "Vendita di pneumatici e ricambi per auto. Dimmi la misura o la targa: ti rispondo con disponibilità e prezzo. Se vuoi, mi occupo anche del montaggio.") + f'''
 <section class="gomme-sez gomme-sez--pagina"><div class="wrap gomme-griglia">
   <div class="gomme-testo">
-    <h2>Gomme</h2>
+    <h2>Vendita pneumatici</h2>
     <p class="lead">Pneumatici estivi, invernali e quattro stagioni. La misura è scritta sul fianco, per esempio 205/55 R16: se non la sai dimmi la targa e la ricavo io.</p>
     {misura_modulo("gg")}
     <ul class="spunte"><li>{I["check"]}Montaggio e equilibratura in officina</li><li>{I["check"]}Convergenza e campanatura</li><li>{I["check"]}Riparazione delle forature</li></ul>
@@ -486,8 +479,8 @@ scrivi("gomme-ricambi.html", head("gomme-ricambi.html", "Gomme e ricambi a Frass
 </div></section>
 <section class="sezione sezione--chiara"><div class="wrap gomme-griglia">
   <div>
-    <h2>Ricambi</h2>
-    <p class="lead">Ricambi per auto di tutte le marche. Dimmi targa e pezzo che ti serve: ti rispondo con disponibilità e preventivo, e se vuoi lo monto io.</p>
+    <h2>Vendita ricambi</h2>
+    <p class="lead">Vendita di ricambi per auto di tutte le marche. Dimmi targa e pezzo che ti serve: ti rispondo con disponibilità e preventivo, e se vuoi lo monto io.</p>
     <ul class="spunte"><li>{I["check"]}Ricambi per auto di tutte le marche</li><li>{I["check"]}Preventivo gratuito</li><li>{I["check"]}Montaggio in officina</li></ul>
   </div>
   <form class="scheda" data-modulo data-intro="Ciao Luca, vorrei un preventivo per un ricambio." novalidate aria-labelledby="rc-t">
@@ -504,7 +497,7 @@ scrivi("officina-mobile.html", head("officina-mobile.html", "Officina mobile a d
       "Forature, cambio delle ruote montate, diagnosi e piccoli interventi direttamente dove si trova l'auto, a Casale Monferrato e dintorni.", [SCHEMA]) + header("officina-mobile.html")
       + intro_pagina("Officina mobile", "Per i lavori che si possono fare sul posto arrivo io, con il furgone attrezzato. Il resto lo facciamo in officina.") + f'''
 <section class="sezione"><div class="wrap mobile-griglia">
-  <figure class="mobile-foto"><img src="{A}assets/img/furgone-1080.webp" alt="Il furgone officina mobile di L.M. Autoservizi" width="1080" height="1080"></figure>
+  <div><p class="segnale">A casa, al lavoro o dove sei fermo</p><h2>L'officina<br>arriva da te.</h2><p class="lead">Un intervento sul posto, quando possibile. Il ritiro in sede, quando serve.</p></div>
   <div>
     <h2>Cosa faccio sul posto</h2>
     <ul class="spunte"><li>{I["check"]}Riparazione delle forature</li><li>{I["check"]}Cambio delle ruote già montate sui cerchi</li><li>{I["check"]}Diagnosi elettronica e lettura delle spie</li><li>{I["check"]}Problemi elettrici e di avviamento, nei casi semplici</li></ul>
@@ -530,7 +523,7 @@ scrivi("chi-sono.html", head("chi-sono.html", "Chi sono: Luca Miglietta, meccani
       + intro_pagina("Chi sono", "Mi chiamo Luca Miglietta. Lavoro da solo, quindi l'auto che mi affidi la segue una persona sola, dall'inizio alla fine.") + f'''
 <section class="sezione"><div class="wrap chi">
   <dl class="tessera" data-rivela>
-    <div><dt>Titolare</dt><dd>Luca Miglietta</dd></div><div><dt>Officina</dt><dd>Via Ticineto 15, Frassineto Po</dd></div>
+    <div><dt>Titolare</dt><dd>Luca Miglietta</dd></div><div><dt>Officina</dt><dd>Frassineto Po, già operativa</dd></div>
     <div><dt>Esperienza</dt><dd>Più di dieci anni, multimarca</dd></div><div><dt>Abilitazione</dt><dd>Responsabile tecnico delle revisioni</dd></div>
   </dl>
   <ol class="cronologia" data-rivela>
@@ -548,7 +541,7 @@ scrivi("chi-sono.html", head("chi-sono.html", "Chi sono: Luca Miglietta, meccani
 
 # ================================================================== CONTATTI
 scrivi("contatti.html", head("contatti.html", "Contatti e preventivo gratuito | L.M. Autoservizi",
-      "Chiama il 342 643 6085, scrivi su WhatsApp o chiedi un preventivo gratuito. Via Ticineto 15, Frassineto Po. Lunedì–venerdì 7:30–19:30.", [SCHEMA]) + header("contatti.html")
+      "Chiama il 342 643 6085, scrivi su WhatsApp o chiedi un preventivo personalizzato. Officina a Frassineto Po. Lunedì–venerdì 7:30–19:30.", [SCHEMA]) + header("contatti.html")
       + intro_pagina("Contatti", "Chiamami, scrivimi su WhatsApp o lascia qui la richiesta: ti rispondo io.") + f'''
 <section class="sezione" id="scrivimi"><div class="wrap contatti">
   <form class="scheda" data-modulo data-intro="Ciao Luca, vorrei un preventivo." novalidate aria-labelledby="sc-t">
@@ -557,8 +550,8 @@ scrivi("contatti.html", head("contatti.html", "Contatti e preventivo gratuito | 
       <div class="scelte">
         <label><input type="radio" name="motivo" value="Ritiro e consegna" data-etichetta="Richiesta" checked><span>Ritiro e consegna</span></label>
         <label><input type="radio" name="motivo" value="La porto in officina" data-etichetta="Richiesta"><span>La porto io in officina</span></label>
-        <label><input type="radio" name="motivo" value="Gomme" data-etichetta="Richiesta"><span>Gomme</span></label>
-        <label><input type="radio" name="motivo" value="Ricambi" data-etichetta="Richiesta"><span>Ricambi</span></label>
+        <label><input type="radio" name="motivo" value="Acquisto gomme" data-etichetta="Richiesta"><span>Acquisto gomme</span></label>
+        <label><input type="radio" name="motivo" value="Acquisto ricambi" data-etichetta="Richiesta"><span>Acquisto ricambi</span></label>
         <label><input type="radio" name="motivo" value="Intervento sul posto (officina mobile)" data-etichetta="Richiesta"><span>Intervento sul posto</span></label>
         <label><input type="radio" name="motivo" value="Altro" data-etichetta="Richiesta"><span>Altro</span></label>
       </div></fieldset>
@@ -568,8 +561,8 @@ scrivi("contatti.html", head("contatti.html", "Contatti e preventivo gratuito | 
     </div>
     {targa_campo("c-targa")}
     <div class="campo"><label for="c-comune">Comune</label><input id="c-comune" name="comune" data-etichetta="Comune" autocomplete="address-level2" placeholder="Es. Casale Monferrato"></div>
-    <div class="campo"><label for="c-categoria">Tipo di problema</label><select id="c-categoria" name="categoria" data-etichetta="Tipo di problema" required>{opzioni_problema(True)}</select><p class="errore" aria-live="polite"></p></div>
-    <div class="campo"><label for="c-msg">Descrivi il problema</label><textarea id="c-msg" name="messaggio" data-etichetta="Messaggio" rows="4" required placeholder="Es. l'auto non parte, la batteria sembra scarica"></textarea><p class="errore" aria-live="polite"></p></div>
+    <div class="campo"><label for="c-categoria">Servizio o tipo di problema</label><select id="c-categoria" name="categoria" data-etichetta="Richiesta su" required>{opzioni_problema(True)}</select><p class="errore" aria-live="polite"></p></div>
+    <div class="campo"><label for="c-msg">Descrivi la tua richiesta</label><textarea id="c-msg" name="messaggio" data-etichetta="Messaggio" rows="4" required placeholder="Es. cerco un ricambio, oppure l'auto non parte"></textarea><p class="errore" aria-live="polite"></p></div>
     <label class="consenso"><input type="checkbox" name="privacy" required><span>Acconsento al trattamento dei miei dati per ricevere il preventivo, come descritto nell'<a href="privacy.html">informativa privacy</a>.</span></label>
     <p class="errore" aria-live="polite"></p>
     <div class="azioni"><button class="btn btn--wa" type="submit" value="whatsapp">{I["chat"]}Invia su WhatsApp</button><button class="btn btn--vuoto" type="submit" value="email">{I["mail"]}Invia per email</button></div>
@@ -581,12 +574,13 @@ scrivi("contatti.html", head("contatti.html", "Contatti e preventivo gratuito | 
       <li><span>WhatsApp</span><a href="{WA}" target="_blank" rel="noopener">Scrivi un messaggio</a></li>
       <li><span>Email</span><a href="mailto:{EMAIL}">{EMAIL}</a></li>
       <li><span>PEC</span><a href="mailto:{PEC}">{PEC}</a></li>
-      <li><span>Officina</span>Via Ticineto 15, 15040 Frassineto Po (AL)</li>
+      <li><span>Officina</span>Frassineto Po (AL), già operativa</li>
+      <li><span>Sede legale</span>{SEDE_LEGALE}</li>
       <li><span>Partita IVA</span>02625920067</li>
     </ul>
     {ORARI}
     <p><span class="stato" data-stato></span></p>
-    {MAPPA}
+    {ARRIVO}
   </div>
 </div></section>''' + footer(dialog=False))
 
@@ -601,7 +595,7 @@ scrivi("privacy.html", head("privacy.html", "Privacy e cookie | L.M. Autoservizi
   <p>La base giuridica è la richiesta dell'interessato (misure precontrattuali, art. 6.1.b GDPR). I dati sono conservati per il tempo necessario a gestire la richiesta e gli eventuali obblighi fiscali successivi.</p>
   <h2>Servizi di terze parti</h2>
   <ul><li><strong>WhatsApp</strong> (Meta) ed email: se scegli questi canali, il messaggio viene trattato anche secondo le loro condizioni.</li>
-  <li><strong>Google Maps</strong>: la mappa si carica solo se premi “Mostra la mappa”. Da quel momento Google può impostare cookie.</li></ul>
+  <li><strong>Google Maps</strong>: i collegamenti alle recensioni aprono il servizio esterno. Nessuna mappa viene caricata nel sito.</li></ul>
   <h2>Cookie</h2>
   <p>Questo sito non usa cookie di profilazione né strumenti di statistica. Per questo non mostra un banner cookie.</p>
   <h2>I tuoi diritti</h2>
@@ -618,3 +612,28 @@ for nome in ("nuovo.css", "nuovo.js"):
     with open(os.path.join(OUT, nome), "w", encoding="utf-8", newline="\n") as f:
         f.write(testo)
     print("copiato", nome)
+
+# Mantiene funzionanti i link della prima demo e dell'anteprima in nuovo/.
+PAGINE = ["index.html", "officina.html", "ritiro-consegna.html", "gomme-ricambi.html",
+          "officina-mobile.html", "chi-sono.html", "contatti.html", "privacy.html", "404.html"]
+ALIAS = {"servizi.html": "officina.html", "come-funziona.html": "ritiro-consegna.html",
+         "servizio-meccanico.html": "officina.html#manutenzione",
+         "servizio-diagnosi.html": "officina.html#diagnosi",
+         "servizio-elettrauto.html": "officina.html#elettrauto",
+         "servizio-gommista.html": "gomme-ricambi.html",
+         "servizio-carrozzeria.html": "officina.html#carrozzeria",
+         "servizio-prerevisione.html": "officina.html#revisione",
+         "servizio-consulenza.html": "officina.html#aziende"}
+ALIAS.update({"nuovo/" + pagina: "../" + pagina for pagina in PAGINE})
+for nome, destinazione in ALIAS.items():
+    scrivi(nome, f'''<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L.M. Autoservizi — officina a Frassineto Po</title><meta name="robots" content="noindex, nofollow">
+<meta http-equiv="refresh" content="0;url={escape(destinazione, quote=True)}">
+<script>var u=new URL({json.dumps(destinazione)},location.href);u.search=location.search;if(!u.hash)u.hash=location.hash;location.replace(u.href);</script>
+</head><body><p>Il sito dell'officina è qui: <a href="{escape(destinazione, quote=True)}">continua su L.M. Autoservizi</a>.</p></body></html>
+''')
+
+scrivi("robots.txt", "User-agent: *\nDisallow: /\n" if DEMO else f"User-agent: *\nAllow: /\nSitemap: {DOMINIO}/sitemap.xml\n")
+url_sitemap = "".join(f"<url><loc>{DOMINIO}/{'' if pagina == 'index.html' else pagina}</loc></url>\n" for pagina in PAGINE if pagina != "404.html")
+scrivi("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + url_sitemap + '</urlset>\n')

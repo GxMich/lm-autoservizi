@@ -9,7 +9,7 @@
 
     function testo() {
       if (!campi.problema.value) return "";
-      var righe = ["Ciao Luca, vorrei informazioni per un intervento sulla mia auto.", "", "Problema: " + campi.problema.value];
+      var righe = ["Ciao Luca, vorrei informazioni sui tuoi servizi.", "", "Richiesta: " + campi.problema.value];
       var auto = campi.auto.value.trim(), comune = campi.comune.value.trim(), dettagli = campi.dettagli.value.trim();
       if (auto) righe.push("Auto: " + auto);
       if (comune) righe.push("Comune: " + comune);
@@ -20,7 +20,7 @@
     }
 
     function aggiorna() {
-      anteprima.textContent = testo() || "Scegli il problema: il messaggio comparirà qui.";
+      anteprima.textContent = testo() || "Scegli il servizio o il problema: il messaggio comparirà qui.";
       esito.hidden = true;
       esito.replaceChildren();
       if (campi.problema.value) {
@@ -36,7 +36,7 @@
       var messaggio = testo();
       if (!messaggio) {
         campi.problema.setAttribute("aria-invalid", "true");
-        errore.textContent = "Scegli il problema. Se non lo sai, seleziona «Altro / non so quale sia il problema».";
+        errore.textContent = "Scegli il servizio o il problema. Se non lo sai, seleziona «Altro / non so quale sia il problema».";
         errore.hidden = false;
         campi.problema.focus();
         return;
